@@ -1,6 +1,6 @@
 services:
   shelfmark-ebooks:
-    image: ghcr.io/calibrain/shelfmark:v1.3.13
+    image: ghcr.io/calibrain/shelfmark:v1.3.14
     container_name: shelfmark-ebooks
     restart: unless-stopped
 
