@@ -35,12 +35,18 @@ services:
       # Existing InfiniDysk ebook/manual category.
       SABNZBD_CATEGORY: books
 
+      # Repair missing EPUB series metadata after successful imports.
+      CUSTOM_SCRIPT: /config/epub-series-fix.py
+      CUSTOM_SCRIPT_PATH_MODE: absolute
+      CUSTOM_SCRIPT_JSON_PAYLOAD: "true"
+
     ports:
       - "8086:8084"
 
     volumes:
       # Completely separate Shelfmark config.
       - /home/sawdoctor/docker/shelfmark-ebooks/config:/config
+      - ./scripts/epub-series-fix.py:/config/epub-series-fix.py:ro
       - ./patches/base_handler.py:/app/shelfmark/download/clients/base_handler.py:ro
 
       # Real physical ebook destination: existing GDrive/rclone mount.
