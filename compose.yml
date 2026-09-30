@@ -1,75 +1,37 @@
 services:
   shelfmark-ebooks:
-    image: ghcr.io/calibrain/shelfmark:v1.3.14
-    container_name: shelfmark-ebooks
+    image: ${SHELFMARK_IMAGE:-ghcr.io/calibrain/shelfmark:v1.4.0}
     restart: unless-stopped
 
     environment:
-      PUID: "1000"
-      PGID: "1000"
-      TZ: Europe/London
-
-      SEARCH_PAGE_TITLE: Shelfmark Ebooks
-      SUPPORTED_FORMATS: epub,pdf
-      BOOK_LANGUAGE: en
-
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-Etc/UTC}
+      SEARCH_PAGE_TITLE: ${SEARCH_PAGE_TITLE:-Shelfmark eBooks}
+      SUPPORTED_FORMATS: ${SUPPORTED_FORMATS:-epub,pdf}
+      BOOK_LANGUAGE: ${BOOK_LANGUAGE:-en}
+      DEFAULT_CONTENT_TYPE: ebook
       BOOKS_OUTPUT_MODE: folder
       INGEST_DIR: /books
-      FILE_ORGANIZATION: organize
-
-      # Copy to GDrive first, then clean up only this completed Usenet job.
-      PROWLARR_USENET_ACTION: move
-      INFINITYDYSK_EXACT_CLEANUP: "false"
-
-      # Search only through the existing Prowlarr instance.
+      FILE_ORGANIZATION: ${FILE_ORGANIZATION:-organize}
       PROWLARR_ENABLED: "true"
-      PROWLARR_URL: http://prowlarr:9696
-      PROWLARR_API_KEY: ${PROWLARR_API_KEY}
+      PROWLARR_URL: ${PROWLARR_URL:-http://prowlarr:9696}
+      PROWLARR_API_KEY: ${PROWLARR_API_KEY:-}
       PROWLARR_AUTO_EXPAND: "false"
-
-      # InfiniDysk presents its existing SAB-compatible API to Shelfmark.
       PROWLARR_USENET_CLIENT: sabnzbd
-      SABNZBD_URL: http://sabnzbd-ebooks:8080
-      SABNZBD_API_KEY: ${SABNZBD_API_KEY}
-
-      # Existing InfiniDysk ebook/manual category.
-      SABNZBD_CATEGORY: books
-
-      # Repair missing EPUB series metadata after successful imports.
+      SABNZBD_URL: ${SABNZBD_URL:-http://sabnzbd:8080}
+      SABNZBD_API_KEY: ${SABNZBD_API_KEY:-}
+      SABNZBD_CATEGORY: ${SABNZBD_CATEGORY:-books}
+      PROWLARR_USENET_ACTION: ${PROWLARR_USENET_ACTION:-move}
       CUSTOM_SCRIPT: /custom-scripts/epub-series-fix.py
       CUSTOM_SCRIPT_PATH_MODE: absolute
       CUSTOM_SCRIPT_JSON_PAYLOAD: "true"
 
     ports:
-      - "8086:8084"
+      - "${SHELFMARK_PORT:-8086}:8084"
 
     volumes:
-      # Completely separate Shelfmark config.
-      - /home/sawdoctor/docker/shelfmark-ebooks/config:/config
+      - ${SHELFMARK_CONFIG_DIR:-./config}:/config
+      - ${EBOOK_LIBRARY_DIR:-./books}:/books
+      - ${SAB_DOWNLOADS_DIR:-./downloads}:/downloads
       - ./scripts:/custom-scripts:ro
-      - ./patches/base_handler.py:/app/shelfmark/download/clients/base_handler.py:ro
-
-      # Real physical ebook destination: existing GDrive/rclone mount.
-      - /mnt/media/ebooks:/books
-
-      # Real SABnzbd completed downloads shared with Shelfmark.
-      - /home/sawdoctor/docker/sabnzbd/downloads:/downloads:rw
-
-      # InfiniDysk is READ-ONLY globally.
-      # Required so completed symlinks can resolve their /mnt/nzbdav/.ids targets.
-      - /mnt/nzbdav/.ids:/mnt/nzbdav/.ids:ro
-
-      # The ONLY writable InfiniDysk area exposed to Shelfmark:
-      # completed uncategorized symlinks.
-      - /mnt/nzbdav/completed-symlinks/uncategorized:/mnt/nzbdav/completed-symlinks/uncategorized:rw
-
-    networks:
-      - media-core
-      - web-network
-
-networks:
-  media-core:
-    external: true
-
-  web-network:
-    external: true
