@@ -78,3 +78,27 @@ production deployment.
 - Libraseer deployment maintained by sawdoctor.
 
 See [LICENSE](LICENSE) for the deployment repository licence.
+
+## Existing InfiniDysk installations
+
+Some older server installations bind-mount a modified `base_handler.py` over
+Shelfmark's handler. Updating the image alone leaves that old handler active.
+Do not remove the override without checking which behavior it supplies.
+
+[`patches/v1.4.0/base_handler.py`](patches/v1.4.0/base_handler.py) carries the
+original optional exact-job InfiniDysk cleanup onto official Shelfmark v1.4.0.
+It is for existing installations using `INFINITYDYSK_EXACT_CLEANUP`; the portable
+Compose deployment does not enable or mount it by default. The change retains
+the successful-import-only cleanup of the exact completed history job, including
+its existing failure behavior. Existing EPUB series scripts remain separate.
+
+The live installation inspected on 14 October 2026 used official v1.3.15 plus a
+mounted handler, not a custom image. Its legacy handler SHA-256 was
+`6b38603b8b2fb57964050c9d1a4385eb20d8120843709bee1714cd00c4bede5f`.
+The adapted v1.4.0 handler SHA-256 is
+`ae0c9ac4b380bd64d3140a998594c650df188bf6bb805736a83cb0e6f6d6bf22`.
+A matched handler can be upgraded together with the image without rebuilding
+Shelfmark. Back up the live Compose file, handler and application configuration
+first; preserve local paths, networks and download-client settings.
+
+Preparation is complete; deployment status must be confirmed from the server.
