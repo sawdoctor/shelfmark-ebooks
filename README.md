@@ -101,4 +101,11 @@ A matched handler can be upgraded together with the image without rebuilding
 Shelfmark. Back up the live Compose file, handler and application configuration
 first; preserve local paths, networks and download-client settings.
 
-Preparation is complete; deployment status must be confirmed from the server.
+Live deployment was confirmed on 14 October 2026: the server completed the
+v1.4.0 image and handler update, verified the mounted handler checksum inside
+the healthy container, and retained the existing mounts, ports, networks,
+configured environment and custom script. The real Compose image pin was
+updated, so subsequent Dockhand redeploys retain v1.4.0. Private original
+configuration/database and handler backups remain available; no book payloads
+were copied or deleted. Container health and deployment were verified; a new
+end-to-end acquisition was not run for this operator update.
